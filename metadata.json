@@ -1,0 +1,5 @@
+{
+  "name": "FitTrack",
+  "description": "A clean, calendar-focused fitness tracker to visualize your daily progress and maintain workout streaks.",
+  "requestFramePermissions": []
+}

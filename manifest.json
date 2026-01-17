@@ -1,0 +1,27 @@
+
+{
+  "short_name": "FitTrack",
+  "name": "FitTrack Minimalist Fitness Tracker",
+  "description": "A clean, calendar-focused fitness tracker to visualize your daily progress and maintain workout streaks.",
+  "id": "/?source=pwa",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#10b981",
+  "background_color": "#f8fafc",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3048/3048398.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3048/3048398.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
