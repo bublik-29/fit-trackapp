@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { MonthSummary, Language } from './types';
 
@@ -23,7 +24,6 @@ const Summary: React.FC<SummaryProps> = ({ summary, lang, t }) => {
   return (
     <div className="space-y-6 mb-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Monthly Report Card */}
         <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex items-center gap-4 relative overflow-hidden group">
           <div className="absolute inset-y-0 left-0 w-1.5 bg-emerald-500"></div>
           <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
@@ -35,7 +35,6 @@ const Summary: React.FC<SummaryProps> = ({ summary, lang, t }) => {
               <p className="text-2xl font-black text-slate-800">{summary.totalWorkouts}</p>
               <p className="text-slate-400 text-xs font-bold">/ {summary.daysInMonth || 30} {t.days}</p>
             </div>
-            {/* Minimal Progress Bar */}
             <div className="mt-2 h-1 w-full bg-slate-100 rounded-full overflow-hidden">
                <div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: `${completionPercentage}%` }}></div>
             </div>
