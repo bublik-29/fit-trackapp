@@ -15,23 +15,52 @@ interface WorkoutModalProps {
 }
 
 const getBlockData = (lang: Language) => [
-  { id: 1, title: 'Block 1', exercises: [{ name: 'Barbell Curl' }, { name: 'French Press' }] },
-  { id: 2, title: 'Block 2', exercises: [{ name: 'Military Press' }, { name: 'Reverse Curl' }] },
-  { id: 3, title: 'Block 3', exercises: [{ name: 'Upright Row' }, { name: 'Wrist Curl' }] }
+  {
+    id: 1,
+    title: { en: 'Block 1: Basic Endurance', ru: 'Блок 1: Базовая выносливость', pl: 'Blok 1: Podstawowa wytrzymałość' }[lang],
+    exercises: [
+      { name: { en: 'Standing Barbell Bicep Curl', ru: 'Подъем штанги на бицепс стоя', pl: 'Uginanie ramion ze sztangą stojąc' }[lang] },
+      { name: { en: 'Standing French Press', ru: 'Французский жим стоя', pl: 'Wyciskanie francuskie stojąc' }[lang] }
+    ]
+  },
+  {
+    id: 2,
+    title: { en: 'Block 2: Shoulder Strength', ru: 'Блок 2: Сила плеч', pl: 'Blok 2: Siła barków' }[lang],
+    exercises: [
+      { name: { en: 'Military Press', ru: 'Армейский жим', pl: 'Wyciskanie żołnierskie' }[lang] },
+      { name: { en: 'Reverse Grip Barbell Curl', ru: 'Подъем штанги обратным хватом', pl: 'Uginanie ramion nachwytem' }[lang] }
+    ]
+  },
+  {
+    id: 3,
+    title: { en: 'Block 3: Grip & Detailing', ru: 'Блок 3: Хват и детализация', pl: 'Blok 3: Chwyt i detale' }[lang],
+    exercises: [
+      { name: { en: 'Upright Row', ru: 'Тяга к подбородку', pl: 'Podciąganie sztangi wzdłuż tułowia' }[lang] },
+      { name: { en: 'Seated Wrist Curls', ru: 'Сгибания в запястьях сидя', pl: 'Uginanie nadgarstków siedząc' }[lang] }
+    ]
+  }
 ];
 
 const WorkoutModal: React.FC<WorkoutModalProps> = ({ 
   date, isCompleted, currentEntry, prevStats, onSave, onClear, onClose, lang, t 
 }) => {
   const [selectedBlockId, setSelectedBlockId] = useState<1 | 2 | 3>((currentEntry?.blockNumber as 1 | 2 | 3) || 1);
-  const [mode, setMode] = useState<'setup' | 'countdown' | 'active' | 'summary'>(isCompleted ? 'summary' : 'setup');
-  const [setsA, setSetsA] = useState<ExerciseSet[]>(currentEntry?.exerciseA || [{weight:0,reps:20},{weight:0,reps:20},{weight:0,reps:20}]);
-  const [setsB, setSetsB] = useState<ExerciseSet[]>(currentEntry?.exerciseB || [{weight:0,reps:20},{weight:0,reps:20},{weight:0,reps:20}]);
+  const [mode, setMode] = useState<'setup' | 'active' | 'summary'>(isCompleted ? 'summary' : 'setup');
+  
+  const initSet = (sets?: ExerciseSet[]) => sets || [{ weight: 0, reps: 20 }, { weight: 0, reps: 20 }, { weight: 0, reps: 20 }];
+
+  const [setsA, setSetsA] = useState<ExerciseSet[]>(initSet(currentEntry?.exerciseA));
+  const [setsB, setSetsB] = useState<ExerciseSet[]>(initSet(currentEntry?.exerciseB));
+
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [restTimer, setRestTimer] = useState<number | null>(null);
   const [holdProgress, setHoldProgress] = useState(0);
+  
   const holdIntervalRef = useRef<number | null>(null);
   const timerIntervalRef = useRef<number | null>(null);
+
+  const BLOCKS = getBlockData(lang);
+  const block = BLOCKS.find(b => b.id === selectedBlockId)!;
 
   useEffect(() => {
     if (mode === 'active') {
@@ -52,6 +81,19 @@ const WorkoutModal: React.FC<WorkoutModalProps> = ({
     }
     return () => clearInterval(interval);
   }, [restTimer]);
+
+  const updateSet = (exercise: 'A' | 'B', index: number, field: keyof ExerciseSet, value: string) => {
+    const numVal = field === 'weight' ? parseFloat(value) || 0 : parseInt(value) || 0;
+    if (exercise === 'A') {
+      const newSets = [...setsA];
+      newSets[index] = { ...newSets[index], [field]: numVal };
+      setSetsA(newSets);
+    } else {
+      const newSets = [...setsB];
+      newSets[index] = { ...newSets[index], [field]: numVal };
+      setSetsB(newSets);
+    }
+  };
 
   const startHoldFinish = () => {
     setHoldProgress(0);
@@ -81,7 +123,7 @@ const WorkoutModal: React.FC<WorkoutModalProps> = ({
         <div className="p-6 sm:p-8 flex-grow overflow-y-auto">
           <div className="flex justify-between items-center mb-6">
              <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">
-               {mode === 'active' ? `Block ${selectedBlockId}` : (mode === 'summary' ? t.sessionSummary : t.selectBlock)}
+               {mode === 'active' ? block.title : (mode === 'summary' ? t.sessionSummary : t.selectBlock)}
              </h2>
              {mode === 'active' && <div className="px-3 py-1 bg-slate-900 text-white rounded-xl text-sm font-black tabular-nums">{formatTime(timerSeconds)}</div>}
           </div>
@@ -93,6 +135,21 @@ const WorkoutModal: React.FC<WorkoutModalProps> = ({
                   <button key={id} onClick={() => setSelectedBlockId(id as 1|2|3)} className={`flex-1 py-3 rounded-xl border-2 font-black transition-all ${selectedBlockId === id ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-100 text-slate-400'}`}>B{id}</button>
                 ))}
               </div>
+              <div className="grid grid-cols-1 gap-6">
+                  {block.exercises.map((ex, exIdx) => (
+                    <div key={exIdx} className="space-y-3">
+                      <p className="text-xs font-black text-slate-400 uppercase tracking-wide px-1">{ex.name}</p>
+                      <div className="space-y-2">
+                         {[0, 1, 2].map(idx => (
+                           <div key={idx} className="flex gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                             <input type="number" inputMode="decimal" placeholder="Kg" className="w-full p-2 bg-white rounded-lg font-bold border-none" value={(exIdx === 0 ? setsA : setsB)[idx].weight || ''} onChange={(e) => updateSet(exIdx === 0 ? 'A' : 'B', idx, 'weight', e.target.value)} />
+                             <input type="number" inputMode="numeric" placeholder="Reps" className="w-full p-2 bg-white rounded-lg font-bold border-none" value={(exIdx === 0 ? setsA : setsB)[idx].reps || ''} onChange={(e) => updateSet(exIdx === 0 ? 'A' : 'B', idx, 'reps', e.target.value)} />
+                           </div>
+                         ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               <button onClick={() => setMode('active')} className="w-full py-4 bg-emerald-500 text-white font-black rounded-2xl shadow-lg shadow-emerald-100">{t.start}</button>
             </div>
           )}
